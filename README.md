@@ -1,5 +1,7 @@
-Dropplets
-=========
+Dropplets2
+==========
+
+===This software isn't yet stable, proceed with caution==
 
 Dropplets is a minimalist **Markdown** blogging platform focused on delivering just what you need in a blogging solution, but absolutely nothing you don't. When it comes to basic blogging, all you really want to do is write & publish which is where Dropplets excels. It's databaseless, so it installs on any server in just about 30 seconds. 
 
@@ -65,7 +67,7 @@ To change your blog template, click the star icon in the Dropplets toolbar. This
 ## Updating Dropplets
 Eventually, we will be implementing auto-updates for the Dropplets platform, but until then, just replace everything but your **posts** directory and **config.php** when we release a new version of Dropplets.
 
-## License
+## Original Dropplet License
 Copyright (c) 2013 Circa75 Media, LLC
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
