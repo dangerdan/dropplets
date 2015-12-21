@@ -54,7 +54,7 @@ $html = <<<MARKER
         <div class="dp-row">
             <div class="dp-icon dp-icon-dropplets"></div>
             <div class="dp-content">What is This?</div>
-            <a class="dp-link" href="http://dropplets.com" target="_blank"></a>
+            <a class="dp-link" href="https://github.com/dangerdan/dropplets" target="_blank"></a>
         </div>
     </div>
 </div>
@@ -283,7 +283,7 @@ if (isset($_SESSION['user'])) { ?>
         <div class="dp-row">
             <div class="dp-icon dp-icon-large dp-icon-question"></div>
             <div class="dp-content">Need Some Help?</div>
-            <a class="dp-link" href="mailto:help@dropplets.com"></a>
+            <a class="dp-link" href="https://github.com/dangerdan/dropplets"></a>
         </div>
         
         <div class="dp-row">
