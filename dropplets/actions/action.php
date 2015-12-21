@@ -1,6 +1,7 @@
 <?php
+namespace Dropplets\Actions;
 
-class action {
+class Action {
 	
 	protected static $_actions = array();
 	

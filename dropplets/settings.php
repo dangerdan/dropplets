@@ -1,10 +1,24 @@
 <?php 
 
+namespace Dropplets;
+
+
+class Settings {
+    
+    public function test() {
+        
+        echo "Loaded!";
+        
+    }
+    
+}
+
+
 /*-----------------------------------------------------------------------------------*/
 /* Debug Mode
 /*-----------------------------------------------------------------------------------*/
 
-$display_errors = false;
+$display_errors = true;
 
 // Display errors if there are any.
 ini_set('display_errors', $display_errors);
@@ -79,7 +93,7 @@ define('FILE_EXT', '.md');
 /*-----------------------------------------------------------------------------------*/
 
 //no caching if user is logged in
-if ( $_SESSION['user'] ) {
+if ( isset($_SESSION['user']) ) {
 	$post_cache = 'off';
 	$index_cache = 'off';
 }

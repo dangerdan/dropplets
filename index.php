@@ -1,6 +1,11 @@
 <?php
+namespace Dropplets;
+require_once('./vendor/autoload.php');
+
+use \Mibe\FeedWriter\RSS2;
 
 session_start();
+
 
 /*-----------------------------------------------------------------------------------*/
 /* If There's a Config Exists, Continue
@@ -14,6 +19,12 @@ if (file_exists('./config.php')) {
 
 include('./dropplets/settings.php');
 include('./dropplets/functions.php');
+    
+    
+$settings = new Settings;
+
+    
+    $settings::test();
 
 /*-----------------------------------------------------------------------------------*/
 /* Reading File Names
@@ -28,11 +39,13 @@ if (empty($_GET['filename'])) {
     
     //Filename can be /some/blog/post-filename.md We should get the last part only
     $filename = explode('/',$_GET['filename']);
-
+    
     // File name could be the name of a category
-    if($filename[count($filename) - 2] == "category") {
-        $category = $filename[count($filename) - 1];
-        $filename = null;
+    if(count($filename) > 1) {
+        if ($filename[count($filename) - 2] == "category") {
+            $category = $filename[count($filename) - 1];
+            $filename = null;
+        }
     } else {
       
         // Individual Post
@@ -190,7 +203,8 @@ if ($filename==NULL) {
 /*-----------------------------------------------------------------------------------*/
 
 else if ($filename == 'rss' || $filename == 'atom') {
-    ($filename=='rss') ? $feed = new FeedWriter(RSS2) : $feed = new FeedWriter(ATOM);
+    
+    ($filename=='rss') ? $feed = new \FeedWriter\RSS2 : $feed = new \FeedWriter\ATOM;
 
     $feed->setTitle($blog_title);
     $feed->setLink($blog_url);
@@ -208,6 +222,7 @@ else if ($filename == 'rss' || $filename == 'atom') {
 
     if($posts) {
         $c=0;
+        
         foreach($posts as $post) {
             if($c<$feed_max_items) {
                 $item = $feed->createNewItem();
@@ -229,14 +244,14 @@ else if ($filename == 'rss' || $filename == 'atom') {
 				unset($remove_metadata_from[0], $remove_metadata_from[1], $remove_metadata_from[2], $remove_metadata_from[3], $remove_metadata_from[4], $remove_metadata_from[5]);
 				$remove_metadata_from = array_values($remove_metadata_from);
 
-                $item->setDescription(Markdown(implode($remove_metadata_from)));
+                $item->setDescription(\Michelf\Markdown::defaultTransform(implode($remove_metadata_from)));
 
                 $feed->addItem($item);
                 $c++;
             }
         }
     }
-    $feed->genarateFeed();
+    echo $feed->generateFeed();
 }
 
 /*-----------------------------------------------------------------------------------*/
@@ -304,7 +319,7 @@ else {
     } else {
 
         // Get the post title.
-        $post_title = Markdown($fcontents[0]);
+        $post_title = \Michelf\Markdown::defaultTransform($fcontents[0]);
         $post_title = str_replace(array("\n",'<h1>','</h1>'), '', $post_title);
 
         // Get the post intro.
@@ -339,7 +354,7 @@ else {
 
         // Get the post content
         $file_array = array_slice( file($filename), 7);
-        $post_content = Markdown(trim(implode("", $file_array)));
+        $post_content = \Michelf\Markdown::defaultTransform(trim(implode("", $file_array)));
 
         // free memory
         unset($file_array);
@@ -372,7 +387,7 @@ else {
         $page_meta = implode("\n\t", $get_page_meta);
 
         // Generate the post.
-        $post = Markdown(join('', $fcontents));
+        $post = \Michelf\Markdown::defaultTransform(join('', $fcontents));
 
         // Get the post template file.
         include $post_file;

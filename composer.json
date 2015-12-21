@@ -1,0 +1,20 @@
+{
+    "name": "dangerdan/dropplets",
+    "description": "A new modernised version of Dropplets",
+    "authors": [
+        {
+            "name": "Daniel Wright",
+            "email": "hello@danielwright.me"
+        }
+    ],
+    "require": {
+        "mibe/feedwriter": "~1.0",
+        "michelf/php-markdown": "~1.5",
+        "rych/phpass": "~2.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Dropplets\\": "dropplets/"
+        }
+    }
+}

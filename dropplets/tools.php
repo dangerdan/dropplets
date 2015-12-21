@@ -1,18 +1,36 @@
 <?php 
 
-/*-----------------------------------------------------------------------------------*/
-/* If Logged Out, Get the Login Form
-/*-----------------------------------------------------------------------------------*/
 
-$login_error = LOGIN_ERROR;
+namespace Dropplets;
 
-if (!isset($_SESSION['user'])) { ?>
 
-<div class="dp-panel-wrapper <?php if($_COOKIE['dp-panel']) { echo($_COOKIE['dp-panel']); } ?>" id="dp-dropplets">
+class Tools {
+    
+    public function loginForm() {
+        
+        $cookieVal = (isset($_COOKIE['dp-panel'])) ? $_COOKIE['dp-panel'] : "";
+        $img = get_twitter_profile_img(BLOG_TWITTER);
+        $blog_title = BLOG_TITLE;
+        
+        $errorHtml = "";  
+        if (isset($login_error)) {
+$errorHtml = <<<MARKER
+
+        <div class="dp-row">
+            <div class="dp-icon dp-icon-large dp-icon-question"></div>
+            <div class="dp-content">Forget Your password?</div>
+            <a class="dp-link" href="?action=forgot" target="_blank"></a>
+        </div>    
+
+MARKER;
+        }
+        
+$html = <<<MARKER
+<div class="dp-panel-wrapper $cookieVal" id="dp-dropplets">
     <div class="dp-panel">
         <div class="dp-row profile">
             <div class="dp-icon">
-                <img src="<?php echo get_twitter_profile_img(BLOG_TWITTER); ?>" alt="<?php echo(BLOG_TITLE); ?>" />
+                <img src="$img" alt="$blog_title" />
             </div>
             
             <div class="dp-content">
@@ -32,15 +50,7 @@ if (!isset($_SESSION['user'])) { ?>
                 </form>
             </div>
         </div>
-        
-        <?php if (isset($login_error)) { ?>
-        <div class="dp-row">
-            <div class="dp-icon dp-icon-large dp-icon-question"></div>
-            <div class="dp-content">Forget Your password?</div>
-            <a class="dp-link" href="?action=forgot" target="_blank"></a>
-        </div>    
-        <?php }; ?>
-        
+        $errorHtml
         <div class="dp-row">
             <div class="dp-icon dp-icon-dropplets"></div>
             <div class="dp-content">What is This?</div>
@@ -48,14 +58,28 @@ if (!isset($_SESSION['user'])) { ?>
         </div>
     </div>
 </div>
-
-<?php 
+MARKER;
+        return $html;
+        
+    }
+    
+    
+    public function showMenu() {
+        
+        if (!isset($_SESSION['user'])) {
+            return $this->loginForm();
+        }
+    
+    }
+}
 
 /*-----------------------------------------------------------------------------------*/
-/* Otherwise, Get the Toolbar
+/* If Logged Out, Get the Login Form
 /*-----------------------------------------------------------------------------------*/
 
-} else { ?>
+$login_error = LOGIN_ERROR;
+
+if (isset($_SESSION['user'])) { ?>
 
 <div class="dp-panel-wrapper <?php if($_COOKIE['dp-panel']) { echo($_COOKIE['dp-panel']); } ?>" id="dp-dropplets">
     <div class="dp-panel">

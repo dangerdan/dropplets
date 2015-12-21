@@ -1,20 +1,13 @@
 <?php
 
-/*-----------------------------------------------------------------------------------*/
-/* Include 3rd Party Functions
-/*-----------------------------------------------------------------------------------*/
-
-include('./dropplets/includes/feedwriter.php');
-include('./dropplets/includes/markdown.php');
-include('./dropplets/includes/phpass.php');
-include('./dropplets/includes/actions.php');
+use Michelf\Markdown;
+use Dropplets\Actions;
 
 /*-----------------------------------------------------------------------------------*/
 /* User Machine
 /*-----------------------------------------------------------------------------------*/
 
-// Password hashing via phpass.
-$hasher  = new PasswordHash(8,FALSE);
+$login_error = null;
 
 if (isset($_GET['action']))
 {
@@ -24,6 +17,8 @@ if (isset($_GET['action']))
 
         // Logging in.
         case 'login':
+            // Password hashing via phpass.
+            $hasher = new\Phpass\Hash;
             if ((isset($_POST['password'])) && $hasher->CheckPassword($_POST['password'], $password)) {
                 $_SESSION['user'] = true;
 
@@ -114,6 +109,8 @@ define('LOGIN_ERROR', $login_error);
 /*-----------------------------------------------------------------------------------*/
 
 function get_all_posts($options = array()) {
+    
+    $category = null;
     global $dropplets;
 
     if($handle = opendir(POSTS_DIR)) {
@@ -128,7 +125,7 @@ function get_all_posts($options = array()) {
                 $fcontents = file(POSTS_DIR.$entry);
 
                 // Define the post title.
-                $post_title = Markdown($fcontents[0]);
+                $post_title = \Michelf\Markdown::defaultTransform($fcontents[0]);
 
                 // Define the post author.
                 $post_author = str_replace(array("\n", '-'), '', $fcontents[1]);
@@ -143,7 +140,7 @@ function get_all_posts($options = array()) {
                 $post_category = str_replace(array("\n", '-'), '', $fcontents[4]);
 
                 // Early return if we only want posts from a certain category
-                if($options["category"] && $options["category"] != trim(strtolower($post_category))) {
+                if(isset($options["category"]) && $options["category"] && $options["category"] != trim(strtolower($post_category))) {
                     continue;
                 }
 
@@ -151,10 +148,10 @@ function get_all_posts($options = array()) {
                 $post_status = str_replace(array("\n", '- '), '', $fcontents[5]);
 
                 // Define the post intro.
-                $post_intro = Markdown($fcontents[7]);
+                $post_intro = \Michelf\Markdown::defaultTransform($fcontents[7]);
 
                 // Define the post content
-                $post_content = Markdown(join('', array_slice($fcontents, 6, $fcontents.length -1)));
+                $post_content = \Michelf\Markdown::defaultTransform(join('', array_slice($fcontents, 6, count($fcontents) -1)));
 
                 // Pull everything together for the loop.
                 $files[] = array('fname' => $entry, 'post_title' => $post_title, 'post_author' => $post_author, 'post_author_twitter' => $post_author_twitter, 'post_date' => $post_date, 'post_category' => $post_category, 'post_status' => $post_status, 'post_intro' => $post_intro, 'post_content' => $post_content);
@@ -327,7 +324,7 @@ function get_twitter_profile_img($username) {
 	// Get the cached profile image.
     $cache = IS_CATEGORY ? '.' : '';
     $array = split('/category/', $_SERVER['REQUEST_URI']);
-    $array = split('/', $array[1]);
+    if (isset($array[1])) $array = split('/', $array[1]);
     if(count($array)!=1) $cache .= './.';
     $cache .= './cache/';
 	$profile_image = $cache.$username.'.jpg';
@@ -368,7 +365,7 @@ function get_header() { ?>
     <?php echo HEADER_INJECT; ?>
     
     <!-- Plugin Header Injection -->
-    <?php action::run('dp_header'); ?>
+    <?php \Dropplets\Actions\Action::run('dp_header'); ?>
 <?php 
 
 } 
@@ -377,7 +374,11 @@ function get_header() { ?>
 /* Dropplets Footer
 /*-----------------------------------------------------------------------------------*/
 
-function get_footer() { ?>
+function get_footer() { 
+
+$tools = new Dropplets\Tools;
+
+?>
     <!-- jQuery & Required Scripts -->
     <script src="//code.jquery.com/jquery-1.10.2.min.js"></script>
     
@@ -432,13 +433,13 @@ function get_footer() { ?>
     <?php } ?>
     
     <!-- Dropplets Tools -->
-    <?php include('./dropplets/tools.php'); ?>
+    <?php echo $tools->showMenu(); ?>
     
     <!-- User Footer Injection -->
     <?php echo FOOTER_INJECT; ?>
     
     <!-- Plugin Footer Injection -->
-    <?php action::run('dp_footer'); ?>
+    <?php \Dropplets\Actions\Action::run('dp_footer'); ?>
 <?php 
 
 }
