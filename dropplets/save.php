@@ -1,25 +1,35 @@
 <?php
 
+namespace Dropplets;
+require_once('./../vendor/autoload.php');
+
 session_start();
 
 // File locations.
-$settings_file = "../config.php";
+$settings_file = "../config.ini";
 $htaccess_file = "../.htaccess";
-$phpass_file   = '../dropplets/includes/phpass.php';
 $dir = '';
 
 // Get existing settings.
-if (file_exists($settings_file)) {
-    include($settings_file);
-}
-if (file_exists($phpass_file))
-{
-    include($phpass_file);
-    $hasher  = new PasswordHash(8,FALSE);
-}
+
+    $hasher = new \Phpass\Hash;
+
 function settings_format($name, $value) {
-    return sprintf("\$%s = \"%s\";", $name, $value);
+    return sprintf("%s = \"%s\"", $name, $value);
 }
+    $settings = Settings::instance();
+        
+    $blog_email = $settings->get('blog_email');        
+    $blog_twitter = $settings->get('blog_twitter');        
+    $blog_url = $settings->get('blog_url');        
+    $blog_title = $settings->get('blog_title');        
+    $meta_description = $settings->get('meta_description');        
+    $intro_title = $settings->get('intro_title');        
+    $intro_text = $settings->get('intro_text');     
+    $template = $settings->get('template');     
+    $password = $settings->get('password');     
+    $header_inject = $settings->get('header_inject');
+    $footer_inject = $settings->get('footer_inject');
 
 /*-----------------------------------------------------------------------------------*/
 /* Save Submitted Settings
@@ -81,7 +91,6 @@ if ($_POST["submit"] == "submit" && (!file_exists($settings_file) || isset($_SES
     $dir .= str_replace('dropplets/save.php', '', $_SERVER["REQUEST_URI"]);
 
     // Output submitted setup values.
-    $config[] = "<?php";
     $config[] = settings_format("blog_email", $blog_email);
     $config[] = settings_format("blog_twitter", $blog_twitter);
     $config[] = settings_format("blog_url", $blog_url);
@@ -89,7 +98,7 @@ if ($_POST["submit"] == "submit" && (!file_exists($settings_file) || isset($_SES
     $config[] = settings_format("meta_description", $meta_description);
     $config[] = settings_format("intro_title", $intro_title);
     $config[] = settings_format("intro_text", $intro_text);
-    $config[] = "\$password = '".$password."';";
+    $config[] = "password = '".$password."'";
     $config[] = settings_format("header_inject", $header_inject);
     $config[] = settings_format("footer_inject", $footer_inject);
     $config[] = settings_format("template", $template);

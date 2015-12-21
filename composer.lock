@@ -1,10 +1,11 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "3ac69abdbc60ec578a9658527682a40a",
+    "hash": "c9f89a7f431d707178e0bfad3a32738b",
+    "content-hash": "52b2dbd85eae6ca6283e293f7f98d02c",
     "packages": [
         {
             "name": "mibe/feedwriter",

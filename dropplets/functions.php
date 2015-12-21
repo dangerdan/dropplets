@@ -2,6 +2,7 @@
 
 use Michelf\Markdown;
 use Dropplets\Actions;
+use Dropplets\Settings;
 
 /*-----------------------------------------------------------------------------------*/
 /* User Machine
@@ -18,7 +19,9 @@ if (isset($_GET['action']))
         // Logging in.
         case 'login':
             // Password hashing via phpass.
-            $hasher = new\Phpass\Hash;
+            $hasher = new \Phpass\Hash;
+            $settings = Settings::instance();
+            $password = $settings->get('password');
             if ((isset($_POST['password'])) && $hasher->CheckPassword($_POST['password'], $password)) {
                 $_SESSION['user'] = true;
 
@@ -304,7 +307,9 @@ function count_premium_templates($type = 'all') {
 /* If is Home (Could use "is_single", "is_category" as well.)
 /*-----------------------------------------------------------------------------------*/
 
-$homepage = parse_url(BLOG_URL, PHP_URL_PATH);
+
+
+$homepage = parse_url($settings->get('blog_url'), PHP_URL_PATH);
 
 // Get the current page.    
 $currentpage  = $_SERVER["REQUEST_URI"];
@@ -323,8 +328,8 @@ function get_twitter_profile_img($username) {
 	
 	// Get the cached profile image.
     $cache = IS_CATEGORY ? '.' : '';
-    $array = split('/category/', $_SERVER['REQUEST_URI']);
-    if (isset($array[1])) $array = split('/', $array[1]);
+    $array = explode('/category/', $_SERVER['REQUEST_URI']);
+    if (isset($array[1])) $array = explode('/', $array[1]);
     if(count($array)!=1) $cache .= './.';
     $cache .= './cache/';
 	$profile_image = $cache.$username.'.jpg';
@@ -333,7 +338,9 @@ function get_twitter_profile_img($username) {
 	if (!file_exists($profile_image)) {
 	    $image_url = 'http://twitter.com/'.$username.'/profile_image?size=original';
 	    $image = file_get_contents($image_url);
-	    file_put_contents($cache.$username.'.jpg', $image);
+        if (is_dir($cache)) {
+	       file_put_contents($cache.$username.'.jpg', $image);
+        }
 	}
 	
 	// Return the image URL.
@@ -352,17 +359,21 @@ foreach(glob('./plugins/' . '*.php') as $plugin){
 /* Dropplets Header
 /*-----------------------------------------------------------------------------------*/
 
-function get_header() { ?>
+function get_header() {
+
+            $settings = Settings::instance();
+            $blog_url = $settings->get('blog_url');
+?>
     <!-- RSS Feed Links -->
     <link rel="alternate" type="application/rss+xml" title="Subscribe using RSS" href="<?php echo BLOG_URL; ?>rss" />
     <link rel="alternate" type="application/atom+xml" title="Subscribe using Atom" href="<?php echo BLOG_URL; ?>atom" />
     
     <!-- Dropplets Styles -->
-    <link rel="stylesheet" href="<?php echo BLOG_URL; ?>dropplets/style/style.css">
-    <link rel="shortcut icon" href="<?php echo BLOG_URL; ?>dropplets/style/images/favicon.png">
+    <link rel="stylesheet" href="<?php echo $blog_url?>/dropplets/style/style.css">
+    <link rel="shortcut icon" href="<?php echo $blog_url?>/dropplets/style/images/favicon.png">
 
     <!-- User Header Injection -->
-    <?php echo HEADER_INJECT; ?>
+    <?php //echo $settings->get('header_inject'); ?>
     
     <!-- Plugin Header Injection -->
     <?php \Dropplets\Actions\Action::run('dp_header'); ?>
@@ -376,7 +387,8 @@ function get_header() { ?>
 
 function get_footer() { 
 
-$tools = new Dropplets\Tools;
+
+$settings = new Dropplets\Settings;
 
 ?>
     <!-- jQuery & Required Scripts -->
@@ -433,10 +445,13 @@ $tools = new Dropplets\Tools;
     <?php } ?>
     
     <!-- Dropplets Tools -->
-    <?php echo $tools->showMenu(); ?>
+    <?php 
+    
+    $tools = new Dropplets\Tools;
+    echo $tools->showMenu(); ?>
     
     <!-- User Footer Injection -->
-    <?php echo FOOTER_INJECT; ?>
+    <?php echo $settings->get('FOOTER_INJECT'); ?>
     
     <!-- Plugin Footer Injection -->
     <?php \Dropplets\Actions\Action::run('dp_footer'); ?>

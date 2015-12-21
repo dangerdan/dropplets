@@ -11,20 +11,19 @@ session_start();
 /* If There's a Config Exists, Continue
 /*-----------------------------------------------------------------------------------*/
 
-if (file_exists('./config.php')) {
+if (file_exists('./config.ini')) {
 
 /*-----------------------------------------------------------------------------------*/
 /* Get Settings & Functions
 /*-----------------------------------------------------------------------------------*/
 
-include('./dropplets/settings.php');
+    
+    $settings = Settings::instance();
+    $settings->init();
+    
 include('./dropplets/functions.php');
     
     
-$settings = new Settings;
-
-    
-    $settings::test();
 
 /*-----------------------------------------------------------------------------------*/
 /* Reading File Names
@@ -81,10 +80,13 @@ if ($filename==NULL) {
     } else {
         $all_posts = get_all_posts();
     }
-
-    $pagination = ($pagination_on_off != "off") ? get_pagination($page,round(count($all_posts)/ $posts_per_page)) : "";
+    
+    $posts_per_page =  ($settings->get('posts_per_page') != "") ? $settings->get('posts_per_page') : 0;
+    if ($posts_per_page > 0) {
+    $pagination = ($settings->get('pagination_on_off') != "off") ? get_pagination($page,round(count($all_posts)/ $posts_per_page)) : "";
     define('PAGINATION', $pagination);
-    $posts = ($pagination_on_off != "off") ? array_slice($all_posts,$offset,($posts_per_page > 0) ? $posts_per_page : null) : $all_posts;
+    }
+    $posts = ($settings->get('pagination_on_off') != "off") ? array_slice($all_posts,$offset,($posts_per_page > 0) ? $posts_per_page : null) : $all_posts;
 
     if($posts) {
         ob_start();
@@ -104,12 +106,14 @@ if ($filename==NULL) {
             $published_iso_date = $post['post_date'];
 
             // Generate the published date.
+            $date_format = $settings->get('date_format');
             $published_date = strftime($date_format, strtotime($published_iso_date));
 
             // Get the post category.
             $post_category = $post['post_category'];
             
             // Get the post category link.
+            $blog_url = $settings->get('blog_url');
             $post_category_link = $blog_url.'category/'.urlencode(trim(strtolower($post_category)));
 
             // Get the post status.
@@ -134,13 +138,20 @@ if ($filename==NULL) {
             if ($post_status == 'draft') continue;
 
             // Get the milti-post template file.
+            $posts_file = 'templates/' . $settings->get('template') . '/posts.php';
             include $posts_file;
         }
         echo $content;
         $content = ob_get_contents();
 
         // Get the site title
+        $blog_title = $settings->get('blog_title');
         $page_title = $blog_title;
+        
+        $blog_twitter = $settings->get('blog_twitter');
+        
+        $meta_description = $settings->get('meta_description');
+        $blog_url = $settings->get('blog_url');
 
         $blog_image = 'https://api.twitter.com/1/users/profile_image?screen_name='.$blog_twitter.'&size=bigger';
 
@@ -186,12 +197,32 @@ if ($filename==NULL) {
         ob_end_clean();
     }
         ob_start();
+    
+        $blog_url = $settings->get('blog_url');
+        $template_dir_url = $blog_url . '/templates/' . $settings->get('template') . '/';
+        $template_dir = 'templates/' . $settings->get('template') . '/';
+    
+        $index_file = $template_dir . 'index.php';
+    
+    
+        // Variables for template
+        $blog_url = $settings->get('blog_title');
+        $intro_title = $settings->get('intro_title');
+        $intro_text = $settings->get('intro_text');
+        $blog_url = $settings->get('blog_url');
+        $blog_email = $settings->get('blog_email');
+        $blog_title = $settings->get('blog_title');
+        $blog_twitter = $settings->get('blog_twitter');
 
         // Get the index template file.
+        ob_start();
         include_once $index_file;
+        $html = ob_get_clean();
+    
+        echo $html;
 
         //Now that we have the whole index page generated, put it in cache folder
-        if ($index_cache != 'off') {
+        if ($settings->get('index_cache') != 'off') {
             $fp = fopen($cachefile, 'w');
             fwrite($fp, ob_get_contents());
             fclose($fp);
@@ -294,10 +325,10 @@ else {
         ob_start();
 
 	      // Get the index template file.
-        include_once $index_file;
+//        include_once $index_file;
 
         // Cache the post on if caching is turned on.
-        if ($post_cache != 'off')
+        if ($settings->get('post_cache') != 'off')
         {
             $fp = fopen($cachefile, 'w');
             fwrite($fp, ob_get_contents());
@@ -306,6 +337,7 @@ else {
 
     // If there is a cached file for the selected permalink, display the cached post.
     } else if (file_exists($cachefile)) {
+echo "here2!!!";
 
         // Define site title
         $page_title = str_replace('# ', '', $fcontents[0]);
@@ -317,7 +349,26 @@ else {
 
     // If there is a file for the selected permalink, display and cache the post.
     } else {
-
+        
+        
+        // Variables for template
+        $blog_url = $settings->get('blog_title');
+        $intro_title = $settings->get('intro_title');
+        $intro_text = $settings->get('intro_text');
+        $blog_url = $settings->get('blog_url');
+        $blog_email = $settings->get('blog_email');
+        $blog_title = $settings->get('blog_title');
+        $blog_twitter = $settings->get('blog_twitter');
+        $date_format = $settings->get('date_format');
+        
+        $post_cache = $settings->get('post_cache');
+        
+        $template_dir_url = $blog_url . '/templates/' . $settings->get('template') . '/';
+        $template_dir = 'templates/' . $settings->get('template') . '/';
+        
+        $index_file = $template_dir . 'index.php';
+        
+        
         // Get the post title.
         $post_title = \Michelf\Markdown::defaultTransform($fcontents[0]);
         $post_title = str_replace(array("\n",'<h1>','</h1>'), '', $post_title);
@@ -388,6 +439,8 @@ else {
 
         // Generate the post.
         $post = \Michelf\Markdown::defaultTransform(join('', $fcontents));
+    
+        $post_file = $template_dir . 'post.php';
 
         // Get the post template file.
         include $post_file;
@@ -395,7 +448,7 @@ else {
         $content = ob_get_contents();
         ob_end_clean();
         ob_start();
-
+        
         // Get the index template file.
         include_once $index_file;
 
